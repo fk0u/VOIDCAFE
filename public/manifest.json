@@ -1,0 +1,16 @@
+{
+  "name": "VOIDCAFE",
+  "short_name": "VOIDCAFE",
+  "description": "The darkest K-pop fan forum. Enter the void.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/voidcafe.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
