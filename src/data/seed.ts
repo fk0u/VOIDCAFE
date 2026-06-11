@@ -2,16 +2,16 @@ import type { Thread, Comment, User, Community, Notification } from './types'
 import { setStorageItem, isSeeded, markSeeded } from '@/lib/storage'
 
 const COMMUNITIES: Community[] = [
-  { id: 'aespa', name: 'AESPA', description: 'Next Level in the KWANGYA. æ-MYs unite in the digital void.', memberCount: 24300, threadCount: 892, gradient: 'from-violet-600 via-purple-500 to-cyan-400', icon: '⚡' },
-  { id: 'bts', name: 'BTS', description: 'Beyond The Scene. ARMYs discuss music, lore, and everything Bangtan.', memberCount: 89200, threadCount: 3241, gradient: 'from-purple-600 via-violet-500 to-indigo-400', icon: '💜' },
-  { id: 'blackpink', name: 'BLACKPINK', description: 'BLINKS in your area. The revolution will be pink.', memberCount: 67100, threadCount: 2456, gradient: 'from-pink-600 via-rose-500 to-fuchsia-400', icon: '🖤' },
-  { id: 'twice', name: 'TWICE', description: 'ONCE upon a time... OT9 supremacy and wholesome chaos.', memberCount: 45600, threadCount: 1789, gradient: 'from-orange-500 via-amber-400 to-yellow-300', icon: '🍭' },
-  { id: 'straykids', name: 'Stray Kids', description: 'STAYs dominate. 4th gen leaders breaking boundaries.', memberCount: 38900, threadCount: 1567, gradient: 'from-red-600 via-rose-500 to-orange-400', icon: '🔥' },
-  { id: 'newjeans', name: 'NewJeans', description: 'Bunnies hopping into the new era. Y2K nostalgia meets Gen Z.', memberCount: 31200, threadCount: 1234, gradient: 'from-sky-400 via-blue-400 to-indigo-300', icon: '🐰' },
-  { id: 'gidle', name: '(G)I-DLE', description: 'Neverland awaits. Self-produced queens of K-pop.', memberCount: 22100, threadCount: 876, gradient: 'from-violet-500 via-purple-400 to-pink-400', icon: '👑' },
-  { id: 'ive', name: 'IVE', description: 'DIVEs deep into the IVE universe. It\'s what I want.', memberCount: 19800, threadCount: 654, gradient: 'from-rose-400 via-pink-300 to-fuchsia-300', icon: '💎' },
-  { id: 'lesserafim', name: 'LE SSERAFIM', description: 'FEARNOTs pushing forward. Unforgiven and unstoppable.', memberCount: 27600, threadCount: 987, gradient: 'from-emerald-500 via-teal-400 to-cyan-300', icon: '🦋' },
-  { id: 'ateez', name: 'ATEEZ', description: 'ATINYs sail the seven seas. 8 makes 1 team.', memberCount: 21400, threadCount: 765, gradient: 'from-red-500 via-orange-400 to-amber-300', icon: '⚓' },
+  { id: 'aespa', name: 'AESPA', description: 'Next Level in the KWANGYA. æ-MYs unite in the digital void.', memberCount: 24300, threadCount: 892, gradient: 'from-violet-600 via-purple-500 to-cyan-400', icon: '⚡', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/241005_aespa_K-Link_Festival_%28cropped%29.jpg/500px-241005_aespa_K-Link_Festival_%28cropped%29.jpg' },
+  { id: 'bts', name: 'BTS', description: 'Beyond The Scene. ARMYs discuss music, lore, and everything Bangtan.', memberCount: 89200, threadCount: 3241, gradient: 'from-purple-600 via-violet-500 to-indigo-400', icon: '💜', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/BTS_during_a_White_House_press_conference_May_31%2C_2022_%28cropped%29.jpg/500px-BTS_during_a_White_House_press_conference_May_31%2C_2022_%28cropped%29.jpg' },
+  { id: 'blackpink', name: 'BLACKPINK', description: 'BLINKS in your area. The revolution will be pink.', memberCount: 67100, threadCount: 2456, gradient: 'from-pink-600 via-rose-500 to-fuchsia-400', icon: '🖤', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/20240809_Blackpink_Pink_Carpet_09.png/500px-20240809_Blackpink_Pink_Carpet_09.png' },
+  { id: 'twice', name: 'TWICE', description: 'ONCE upon a time... OT9 supremacy and wholesome chaos.', memberCount: 45600, threadCount: 1789, gradient: 'from-orange-500 via-amber-400 to-yellow-300', icon: '🍭', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Twice_-_Dickies_Arena%2C_2022_%28cropped%29.jpg/500px-Twice_-_Dickies_Arena%2C_2022_%28cropped%29.jpg' },
+  { id: 'straykids', name: 'Stray Kids', description: 'STAYs dominate. 4th gen leaders breaking boundaries.', memberCount: 38900, threadCount: 1567, gradient: 'from-red-600 via-rose-500 to-orange-400', icon: '🔥', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Stray_Kids_at_the_40th_Golden_Disc_Awards%2C_January_10%2C_2026_%281%29.png/500px-Stray_Kids_at_the_40th_Golden_Disc_Awards%2C_January_10%2C_2026_%281%29.png' },
+  { id: 'newjeans', name: 'NewJeans', description: 'Bunnies hopping into the new era. Y2K nostalgia meets Gen Z.', memberCount: 31200, threadCount: 1234, gradient: 'from-sky-400 via-blue-400 to-indigo-300', icon: '🐰', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/NewJeans_2023_MelonMusicAwards_composite.jpg/500px-NewJeans_2023_MelonMusicAwards_composite.jpg' },
+  { id: 'gidle', name: '(G)I-DLE', description: 'Neverland awaits. Self-produced queens of K-pop.', memberCount: 22100, threadCount: 876, gradient: 'from-violet-500 via-purple-400 to-pink-400', icon: '👑', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/I-dle_at_Love_Your_W_on_October_15%2C_2025.png/500px-I-dle_at_Love_Your_W_on_October_15%2C_2025.png' },
+  { id: 'ive', name: 'IVE', description: 'DIVEs deep into the IVE universe. It\'s what I want.', memberCount: 19800, threadCount: 654, gradient: 'from-rose-400 via-pink-300 to-fuchsia-300', icon: '💎', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Ive_at_the_40th_Golden_Disc_Awards%2C_January_10%2C_2026_%282%29.png/500px-Ive_at_the_40th_Golden_Disc_Awards%2C_January_10%2C_2026_%282%29.png' },
+  { id: 'lesserafim', name: 'LE SSERAFIM', description: 'FEARNOTs pushing forward. Unforgiven and unstoppable.', memberCount: 27600, threadCount: 987, gradient: 'from-emerald-500 via-teal-400 to-cyan-300', icon: '🦋', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Le_Sserafim_at_2026_Golden_Disc_awards.png/500px-Le_Sserafim_at_2026_Golden_Disc_awards.png' },
+  { id: 'ateez', name: 'ATEEZ', description: 'ATINYs sail the seven seas. 8 makes 1 team.', memberCount: 21400, threadCount: 765, gradient: 'from-red-500 via-orange-400 to-amber-300', icon: '⚓', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/ATEEZ_in_August_2024_%28cropped%29.jpg/500px-ATEEZ_in_August_2024_%28cropped%29.jpg' },
 ]
 
 const USERS: User[] = [
@@ -353,12 +353,14 @@ const NOTIFICATIONS: Notification[] = [
 ]
 
 export function seedDatabase(): void {
+  // Always update communities to get the latest images
+  setStorageItem('communities', COMMUNITIES)
+
   if (isSeeded()) return
 
   setStorageItem('threads', THREADS)
   setStorageItem('comments', COMMENTS)
   setStorageItem('users', USERS)
-  setStorageItem('communities', COMMUNITIES)
   setStorageItem('notifications', NOTIFICATIONS)
   setStorageItem('currentUserId', 'user-current')
 

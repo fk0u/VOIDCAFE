@@ -1,17 +1,39 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, ArrowRight, MessageSquare, Heart } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { useSearch } from '@/hooks/useSearch'
 import { usePreferencesStore } from '@/stores/preferencesStore'
-import { formatTimeAgo, COMMUNITY_COLORS } from '@/lib/utils'
+import { formatTimeAgo, COMMUNITY_COLORS, cn } from '@/lib/utils'
 
 export function SearchModal() {
   const { searchModalOpen, setSearchModalOpen } = usePreferencesStore()
   const [query, setQuery] = useState('')
+  const [activeIndex, setActiveIndex] = useState(0)
   const { data: results, isLoading } = useSearch(query)
+  const router = useRouter()
 
   if (!searchModalOpen) return null
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!results || results.length === 0) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const selected = results[activeIndex]
+      if (selected) {
+        router.navigate({ to: '/thread/$threadId', params: { threadId: selected.id } })
+        setSearchModalOpen(false)
+        setQuery('')
+      }
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -39,7 +61,11 @@ export function SearchModal() {
             <input
               autoFocus
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setActiveIndex(0)
+              }}
+              onKeyDown={handleKeyDown}
               placeholder="Search threads, users, communities..."
               className="flex-1 bg-transparent text-metal-200 placeholder:text-metal-600 outline-none text-sm"
             />
@@ -85,7 +111,9 @@ export function SearchModal() {
 
             {results && results.length > 0 && (
               <div className="py-2">
-                {results.map((thread) => (
+                {results.map((thread, idx) => {
+                  const isActive = idx === activeIndex
+                  return (
                   <Link
                     key={thread.id}
                     to="/thread/$threadId"
@@ -94,7 +122,11 @@ export function SearchModal() {
                       setSearchModalOpen(false)
                       setQuery('')
                     }}
-                    className="flex items-start gap-3 px-4 py-3 hover:bg-void-elevated transition-colors group"
+                    onMouseEnter={() => setActiveIndex(idx)}
+                    className={cn(
+                      "flex items-start gap-3 px-4 py-3 transition-colors group",
+                      isActive ? "bg-void-elevated" : "hover:bg-void-elevated"
+                    )}
                   >
                     <div
                       className="w-2 h-2 rounded-full mt-2 shrink-0"
@@ -103,7 +135,10 @@ export function SearchModal() {
                       }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-metal-200 group-hover:text-neon-purple transition-colors line-clamp-1">
+                      <p className={cn(
+                        "text-sm font-medium transition-colors line-clamp-1",
+                        isActive ? "text-neon-purple" : "text-metal-200 group-hover:text-neon-purple"
+                      )}>
                         {thread.title}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-metal-500">
@@ -119,9 +154,12 @@ export function SearchModal() {
                         <span>{formatTimeAgo(thread.createdAt)}</span>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-metal-600 opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
+                    <ArrowRight className={cn(
+                      "w-4 h-4 transition-opacity mt-1",
+                      isActive ? "text-neon-purple opacity-100" : "text-metal-600 opacity-0 group-hover:opacity-100"
+                    )} />
                   </Link>
-                ))}
+                )})}
               </div>
             )}
           </div>

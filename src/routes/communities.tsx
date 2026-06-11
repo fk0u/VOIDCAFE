@@ -56,17 +56,28 @@ function CommunitiesPage() {
                       : 'border-void-border bg-void-card hover:border-void-border-light'
                   )}
                 >
-                  {/* Gradient Header */}
-                  <div
-                    className={cn(
-                      'h-20 bg-gradient-to-br relative overflow-hidden metallic-overlay',
-                      community.gradient
+                  {/* Image/Gradient Header */}
+                  <div className="h-32 relative overflow-hidden group/header">
+                    {community.image ? (
+                      <>
+                        <img 
+                          src={community.image} 
+                          alt={community.name} 
+                          className="absolute inset-0 w-full h-full object-cover opacity-60 transition-all duration-500 group-hover:scale-110 group-hover:opacity-80"
+                        />
+                        <div className={cn("absolute inset-0 opacity-40 mix-blend-color bg-gradient-to-br", community.gradient)} />
+                      </>
+                    ) : (
+                      <div className={cn('absolute inset-0 bg-gradient-to-br metallic-overlay', community.gradient)} />
                     )}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-4xl">{community.icon}</span>
-                    </div>
+                    
+                    {/* Dark gradient fade at the bottom */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-void-card via-void-card/20 to-transparent" />
                     <div className="absolute inset-0 scanlines opacity-20" />
+
+                    <div className="absolute bottom-3 left-4 flex items-center justify-center w-10 h-10 rounded-full bg-void-black/50 backdrop-blur-md border border-void-border/50">
+                      <span className="text-xl">{community.icon}</span>
+                    </div>
                   </div>
 
                   <div className="p-4 space-y-2">

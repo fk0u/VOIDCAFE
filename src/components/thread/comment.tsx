@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Reply, ChevronDown, ChevronUp } from 'lucide-react'
-import { useLikeComment, useCreateComment } from '@/hooks/useComments'
+import { Heart, Reply, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { useLikeComment, useCreateComment, useDeleteComment } from '@/hooks/useComments'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/components/ui/toast'
 import { cn, formatTimeAgo } from '@/lib/utils'
@@ -23,9 +23,11 @@ export function Comment({ comment, threadId, level = 0 }: CommentProps) {
   const { currentUser } = useAuthStore()
   const likeMutation = useLikeComment()
   const createMutation = useCreateComment()
+  const deleteMutation = useDeleteComment()
   const { toast } = useToast()
 
   const isLiked = currentUser ? comment.likedBy.includes(currentUser.id) : false
+  const isAuthor = currentUser?.id === comment.authorId
 
   const handleLike = () => {
     if (!currentUser) {
@@ -62,6 +64,20 @@ export function Comment({ comment, threadId, level = 0 }: CommentProps) {
           setReplyText('')
           setShowReply(false)
           toast('Reply posted!', 'success')
+        },
+      }
+    )
+  }
+
+  const handleDelete = () => {
+    if (!window.confirm('Delete this comment?')) return
+    playClick()
+    deleteMutation.mutate(
+      { commentId: comment.id, threadId },
+      {
+        onSuccess: () => {
+          playSuccess()
+          toast('Comment deleted', 'success')
         },
       }
     )
@@ -143,6 +159,17 @@ export function Comment({ comment, threadId, level = 0 }: CommentProps) {
                   Hide replies
                 </>
               )}
+            </button>
+          )}
+
+          {isAuthor && (
+            <button
+              onMouseEnter={playHover}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="flex items-center gap-1 text-xs text-metal-600 hover:text-blood-red transition-colors ml-auto cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

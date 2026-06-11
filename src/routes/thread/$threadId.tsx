@@ -1,9 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Heart, MessageSquare, Eye, Share2, Bookmark, Clock, Send, Loader2 } from 'lucide-react'
+import { ArrowLeft, Heart, MessageSquare, Eye, Share2, Bookmark, Clock, Send, Loader2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useThread, useLikeThread } from '@/hooks/useThreads'
+import { useThread, useLikeThread, useDeleteThread } from '@/hooks/useThreads'
 import { useComments, useCreateComment } from '@/hooks/useComments'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/components/ui/toast'
@@ -23,15 +23,34 @@ function ThreadDetailPage() {
   const { data: comments, isLoading: commentsLoading } = useComments(threadId)
   const { currentUser } = useAuthStore()
   const likeMutation = useLikeThread()
+  const deleteMutation = useDeleteThread()
   const createCommentMutation = useCreateComment()
   const { toast } = useToast()
+  const router = useRouter()
   const [commentText, setCommentText] = useState('')
+  const [isBookmarked, setIsBookmarked] = useState(false)
 
   const isLiked = thread && currentUser ? thread.likedBy.includes(currentUser.id) : false
+  const isAuthor = thread && currentUser ? thread.authorId === currentUser.id : false
 
   const handleLike = () => {
     if (!currentUser || !thread) return
     likeMutation.mutate({ threadId: thread.id, userId: currentUser.id })
+  }
+
+  const handleDelete = () => {
+    if (!thread || !window.confirm('Are you sure you want to delete this thread?')) return
+    deleteMutation.mutate(thread.id, {
+      onSuccess: () => {
+        toast('Thread deleted', 'success')
+        router.navigate({ to: '/' })
+      }
+    })
+  }
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked)
+    toast(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks', 'success')
   }
 
   const handleComment = () => {
@@ -203,9 +222,26 @@ function ThreadDetailPage() {
               >
                 <Share2 className="w-4 h-4" />
               </button>
-              <button className="p-2 rounded-lg text-metal-500 hover:text-neon-cyan hover:bg-neon-cyan/5 transition-all">
-                <Bookmark className="w-4 h-4" />
+              <button 
+                onClick={handleBookmark}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  isBookmarked 
+                    ? "text-neon-cyan bg-neon-cyan/10" 
+                    : "text-metal-500 hover:text-neon-cyan hover:bg-neon-cyan/5"
+                )}
+              >
+                <Bookmark className={cn("w-4 h-4", isBookmarked && "fill-neon-cyan")} />
               </button>
+              {isAuthor && (
+                <button 
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                  className="p-2 rounded-lg text-metal-500 hover:text-blood-red hover:bg-blood-red/5 transition-all ml-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </article>

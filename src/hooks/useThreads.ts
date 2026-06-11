@@ -2,10 +2,22 @@ import { useQuery, useMutation, useInfiniteQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { getStorageItem, setStorageItem } from '@/lib/storage'
 import { generateId } from '@/lib/utils'
-import type { Thread, ThreadFilters } from '@/data/types'
+import type { Thread, ThreadFilters, Notification } from '@/data/types'
+import { useAuthStore } from '@/stores/authStore'
 
 const THREADS_KEY = 'threads'
 const PAGE_SIZE = 6
+
+function pushNotification(notif: Omit<Notification, 'id' | 'createdAt' | 'read'>) {
+  const notifs = getStorageItem<Notification[]>('notifications', [])
+  notifs.unshift({
+    ...notif,
+    id: `notif-${generateId()}`,
+    createdAt: new Date().toISOString(),
+    read: false,
+  })
+  setStorageItem('notifications', notifs)
+}
 
 function getAllThreads(): Thread[] {
   return getStorageItem<Thread[]>(THREADS_KEY, [])
@@ -174,6 +186,7 @@ export function useCreateThread() {
       })
     },
     onSuccess: () => {
+      useAuthStore.getState().incrementThreadCount(1)
       queryClient.invalidateQueries({ queryKey: ['threads'] })
     },
   })
@@ -202,11 +215,23 @@ export function useLikeThread() {
         } else {
           thread.likedBy = [...thread.likedBy, userId]
           thread.likes += 1
+          if (thread.authorId !== userId) {
+            const user = useAuthStore.getState().currentUser
+            if (user) {
+              pushNotification({
+                type: 'like',
+                message: `${user.displayName} liked your thread "${thread.title}"`,
+                threadId: thread.id,
+                fromUser: user.displayName,
+                fromAvatar: user.avatar,
+              })
+            }
+          }
         }
 
         threads[idx] = thread
         setStorageItem(THREADS_KEY, threads)
-        resolve(thread)
+        resolve({ thread, isLiked: likedIndex < 0 })
       })
     },
     onMutate: async ({ threadId, userId }) => {
@@ -239,7 +264,33 @@ export function useLikeThread() {
         queryClient.setQueryData(['thread', threadId], context.previousThread)
       }
     },
-    onSettled: () => {
+    onSettled: (data) => {
+      if (data) {
+        useAuthStore.getState().incrementLikeCount(data.isLiked ? 1 : -1)
+      }
+      queryClient.invalidateQueries({ queryKey: ['threads'] })
+    },
+  })
+}
+
+export function useDeleteThread() {
+  return useMutation({
+    mutationFn: (threadId: string) => {
+      return new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          const threads = getAllThreads()
+          const idx = threads.findIndex((t) => t.id === threadId)
+          if (idx < 0) return reject(new Error('Thread not found'))
+          
+          threads.splice(idx, 1)
+          setStorageItem(THREADS_KEY, threads)
+          
+          useAuthStore.getState().incrementThreadCount(-1)
+          resolve()
+        }, 300)
+      })
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['threads'] })
     },
   })

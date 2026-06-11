@@ -2,7 +2,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Flame, Zap } from 'lucide-react'
-import { GlitchText } from '@/components/ui/glitch-text'
+import { BrandText } from '@/components/ui/brand-text'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { BackgroundBeams } from '@/components/ui/background-beams'
 import { Spotlight } from '@/components/ui/spotlight'
@@ -13,6 +13,7 @@ import { useTrendingThreads } from '@/hooks/useThreads'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { cn, getGradientForCommunity, formatNumber } from '@/lib/utils'
 import { PageTransition } from '@/components/common/page-transition'
+import { KwangyaScene } from '@/components/ui/kwangya-scene'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -27,8 +28,7 @@ function HomePage() {
       <div>
         {/* ═══ Hero Section ═══ */}
       <section className="relative overflow-hidden border-b border-void-border">
-        {/* Cyber grid overlay */}
-        <div className="absolute inset-0 cyber-grid opacity-35 pointer-events-none z-0" />
+        <KwangyaScene />
         <BackgroundBeams />
         <Spotlight className="relative z-10 max-w-7xl mx-auto px-4 py-20 md:py-28">
           <div className="text-center space-y-6">
@@ -37,9 +37,9 @@ function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <GlitchText
+              <BrandText
                 text="VOIDCAFE"
-                className="text-5xl md:text-7xl lg:text-8xl text-metal-100 tracking-[0.15em]"
+                className="text-5xl md:text-7xl lg:text-8xl text-metal-100"
               />
             </motion.div>
 

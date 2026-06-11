@@ -8,15 +8,13 @@ import {
   Home,
   Users,
   User,
-  Menu,
-  X,
   Keyboard,
   Terminal,
 } from 'lucide-react'
-import { GlitchText } from '@/components/ui/glitch-text'
+import { BrandText } from '@/components/ui/brand-text'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { useAuthStore } from '@/stores/authStore'
-import { getStorageItem } from '@/lib/storage'
+import { getStorageItem, setStorageItem } from '@/lib/storage'
 import type { Notification } from '@/data/types'
 import { cn, formatTimeAgo } from '@/lib/utils'
 import { playHover, playClick } from '@/lib/synth'
@@ -31,11 +29,33 @@ export function Navbar() {
   const { setCreateModalOpen, setSearchModalOpen, setTerminalOpen } = usePreferencesStore()
   const { currentUser } = useAuthStore()
   const [showNotifications, setShowNotifications] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const router = useRouter()
 
-  const notifications = getStorageItem<Notification[]>('notifications', [])
+  // Load notifications
+  const loadNotifications = () => {
+    setNotifications(getStorageItem<Notification[]>('notifications', []))
+  }
+
+  // Initial load
+  useState(() => {
+    loadNotifications()
+  })
+
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  const markAllAsRead = () => {
+    const updated = notifications.map(n => ({ ...n, read: true }))
+    setNotifications(updated)
+    setStorageItem('notifications', updated)
+  }
+
+  const removeNotification = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const updated = notifications.filter(n => n.id !== id)
+    setNotifications(updated)
+    setStorageItem('notifications', updated)
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-heavy border-b border-void-border">
@@ -45,10 +65,10 @@ export function Navbar() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center">
             <span className="font-heading font-black text-sm text-white">V</span>
           </div>
-          <GlitchText
+          <BrandText
             text="VOIDCAFE"
             as="span"
-            className="text-lg text-metal-100 hidden sm:block"
+            className="text-lg hidden sm:block"
           />
         </Link>
 
@@ -123,6 +143,7 @@ export function Navbar() {
             onMouseEnter={playHover}
             onClick={() => {
               playClick()
+              if (!showNotifications) loadNotifications()
               setShowNotifications(!showNotifications)
             }}
             className="relative p-2 rounded-lg text-metal-400 hover:text-metal-200 hover:bg-void-elevated transition-all"
@@ -154,13 +175,21 @@ export function Navbar() {
                   className="absolute right-0 top-full mt-2 w-80 rounded-xl bg-void-card border border-void-border shadow-2xl z-50 overflow-hidden"
                 >
                   <div className="px-4 py-3 border-b border-void-border flex items-center justify-between">
-                    <h3 className="font-heading text-sm font-semibold text-metal-200">
+                    <h3 className="font-heading text-sm font-semibold text-metal-200 flex items-center gap-2">
                       Notifications
+                      {unreadCount > 0 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-neon-purple/20 text-neon-purple font-medium">
+                          {unreadCount} new
+                        </span>
+                      )}
                     </h3>
-                    {unreadCount > 0 && (
-                      <span className="text-xs text-neon-purple font-medium">
-                        {unreadCount} new
-                      </span>
+                    {notifications.length > 0 && (
+                      <button 
+                        onClick={markAllAsRead}
+                        className="text-xs text-metal-500 hover:text-neon-cyan transition-colors"
+                      >
+                        Mark read
+                      </button>
                     )}
                   </div>
                   <div className="max-h-64 overflow-y-auto">
@@ -189,16 +218,22 @@ export function Navbar() {
                           >
                             {notif.fromUser.charAt(0)}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 pr-6 relative">
                             <p className="text-sm text-metal-300">
                               <span className="font-semibold text-metal-200">
                                 {notif.fromUser}
                               </span>{' '}
-                              {notif.message}
+                              {notif.message.replace(`${notif.fromUser} `, '')}
                             </p>
                             <p className="text-xs text-metal-500 mt-0.5">
                               {formatTimeAgo(notif.createdAt)}
                             </p>
+                            <button
+                              onClick={(e) => removeNotification(notif.id, e)}
+                              className="absolute right-0 top-0 p-1 text-metal-600 hover:text-blood-red opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
                           </div>
                           {!notif.read && (
                             <div className="w-2 h-2 rounded-full bg-neon-purple mt-2 shrink-0" />
@@ -228,54 +263,7 @@ export function Navbar() {
             currentUser?.displayName?.charAt(0) || 'V'
           )}
         </Link>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden p-2 text-metal-400 hover:text-metal-200"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden border-t border-void-border"
-          >
-            <div className="p-4 space-y-1">
-              {NAV_LINKS.map(({ to, label, icon: Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  onMouseEnter={playHover}
-                  onClick={() => {
-                    playClick()
-                    setMobileMenuOpen(false)
-                  }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-metal-400 hover:text-metal-200 hover:bg-void-elevated transition-all"
-                  activeProps={{
-                    className: 'text-neon-purple bg-neon-purple/10',
-                  }}
-                >
-                  <Icon className="w-5 h-5" />
-                  {label}
-                </Link>
-              ))}
-              <div className="pt-2 border-t border-void-border mt-2">
-                <div className="flex items-center gap-2 px-3 text-xs text-metal-600">
-                  <Keyboard className="w-3 h-3" />
-                  <span>N = New Post • / = Search • Esc = Close</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   )
 }

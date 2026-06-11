@@ -2,9 +2,21 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { getStorageItem, setStorageItem } from '@/lib/storage'
 import { generateId } from '@/lib/utils'
-import type { Comment, Thread } from '@/data/types'
+import type { Comment, Thread, Notification } from '@/data/types'
+import { useAuthStore } from '@/stores/authStore'
 
 const COMMENTS_KEY = 'comments'
+
+function pushNotification(notif: Omit<Notification, 'id' | 'createdAt' | 'read'>) {
+  const notifs = getStorageItem<Notification[]>('notifications', [])
+  notifs.unshift({
+    ...notif,
+    id: `notif-${generateId()}`,
+    createdAt: new Date().toISOString(),
+    read: false,
+  })
+  setStorageItem('notifications', notifs)
+}
 
 function getAllComments(): Comment[] {
   return getStorageItem<Comment[]>(COMMENTS_KEY, [])
@@ -77,8 +89,21 @@ export function useCreateComment() {
           if (tIdx >= 0) {
             threads[tIdx].replyCount += 1
             setStorageItem('threads', threads)
+            
+            // Notify thread author
+            const threadAuthorId = threads[tIdx].authorId
+            if (threadAuthorId !== newComment.authorId) {
+              pushNotification({
+                type: 'reply',
+                message: `${newComment.authorName} replied to your thread "${threads[tIdx].title}"`,
+                threadId: threads[tIdx].id,
+                fromUser: newComment.authorName,
+                fromAvatar: newComment.authorAvatar,
+              })
+            }
           }
-
+          
+          useAuthStore.getState().incrementReplyCount(1)
           resolve(comment)
         }, 200)
       })
@@ -115,11 +140,24 @@ export function useLikeComment() {
         } else {
           comment.likedBy = [...comment.likedBy, userId]
           comment.likes += 1
+          
+          if (comment.authorId !== userId) {
+            const user = useAuthStore.getState().currentUser
+            if (user) {
+              pushNotification({
+                type: 'like',
+                message: `${user.displayName} liked your comment`,
+                threadId: threadId,
+                fromUser: user.displayName,
+                fromAvatar: user.avatar,
+              })
+            }
+          }
         }
 
         comments[idx] = comment
         setStorageItem(COMMENTS_KEY, comments)
-        resolve(comment)
+        resolve({ comment, isLiked: likedIndex < 0 })
       })
     },
     onMutate: async ({ commentId, threadId, userId }) => {
@@ -133,8 +171,44 @@ export function useLikeComment() {
         }
       )
     },
-    onSettled: (_data, _err, { threadId }) => {
+    onSettled: (data, _err, { threadId }) => {
+      if (data) {
+        useAuthStore.getState().incrementLikeCount(data.isLiked ? 1 : -1)
+      }
       queryClient.invalidateQueries({ queryKey: ['comments', threadId] })
+    },
+  })
+}
+
+export function useDeleteComment() {
+  return useMutation({
+    mutationFn: ({ commentId, threadId }: { commentId: string, threadId: string }) => {
+      return new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          const comments = getAllComments()
+          const idx = comments.findIndex((c) => c.id === commentId)
+          if (idx < 0) return reject(new Error('Comment not found'))
+          
+          comments.splice(idx, 1)
+          setStorageItem(COMMENTS_KEY, comments)
+          
+          useAuthStore.getState().incrementReplyCount(-1)
+          
+          // Decrement thread reply count
+          const threads = getStorageItem<Thread[]>('threads', [])
+          const tIdx = threads.findIndex((t) => t.id === threadId)
+          if (tIdx >= 0) {
+            threads[tIdx].replyCount = Math.max(0, threads[tIdx].replyCount - 1)
+            setStorageItem('threads', threads)
+          }
+          
+          resolve()
+        }, 300)
+      })
+    },
+    onSuccess: (_, { threadId }) => {
+      queryClient.invalidateQueries({ queryKey: ['comments', threadId] })
+      queryClient.invalidateQueries({ queryKey: ['thread', threadId] })
     },
   })
 }

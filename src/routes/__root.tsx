@@ -32,7 +32,7 @@ function RootComponent() {
       >
         <FloatingParticles count={15} />
         <Navbar />
-        <main className="pt-16">
+        <main className="pt-16 pb-20 md:pb-0">
           <Outlet />
         </main>
         <MobileNav />

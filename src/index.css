@@ -70,6 +70,8 @@ body {
   font-family: var(--font-body);
   background-color: var(--color-void-black);
   overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -335,4 +337,23 @@ body {
     linear-gradient(to bottom, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
   background-size: 30px 30px;
   animation: grid-pan 20s linear infinite;
+}
+
+/* ── Brand Text Animations ── */
+@keyframes hologram-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(168,85,247,0.4)) drop-shadow(0 0 20px rgba(34,211,238,0.2)); }
+  50% { filter: drop-shadow(0 0 15px rgba(168,85,247,0.8)) drop-shadow(0 0 30px rgba(34,211,238,0.5)); }
+}
+
+@keyframes shimmer-fast {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.animate-hologram-pulse {
+  animation: hologram-pulse 4s ease-in-out infinite;
+}
+
+.animate-shimmer-fast {
+  animation: shimmer-fast 4s linear infinite;
 }

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldAlert, Lock, Unlock, Loader2 } from 'lucide-react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { initAudio, playDecryptSweep, playBeep, playGlitch, startSynth } from '@/lib/synth'
-import { GlitchText } from './glitch-text'
+import { BrandText } from './brand-text'
 
 export function Preloader() {
   const { preloaded, setPreloaded, synthEnabled } = usePreferencesStore()
@@ -185,9 +185,9 @@ export function Preloader() {
 
               {/* Title */}
               <div className="space-y-1">
-                <GlitchText
+                <BrandText
                   text="VOIDCAFE"
-                  className="text-4xl font-heading font-black tracking-[0.2em] text-metal-100"
+                  className="text-4xl text-metal-100"
                 />
                 <p className="text-[10px] font-mono text-metal-500 uppercase tracking-widest">
                   Secure Cyber-Metallic Network

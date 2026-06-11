@@ -52,6 +52,7 @@ export interface Community {
   threadCount: number
   gradient: string
   icon: string
+  image?: string
 }
 
 export interface Notification {
