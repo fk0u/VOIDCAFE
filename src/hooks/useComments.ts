@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { getStorageItem, setStorageItem } from '@/lib/storage'
 import { generateId } from '@/lib/utils'
-import type { Comment } from '@/data/types'
+import type { Comment, Thread } from '@/data/types'
 
 const COMMENTS_KEY = 'comments'
 
@@ -72,7 +72,7 @@ export function useCreateComment() {
           setStorageItem(COMMENTS_KEY, comments)
 
           // Update thread reply count
-          const threads = getStorageItem<any[]>('threads', [])
+          const threads = getStorageItem<Thread[]>('threads', [])
           const tIdx = threads.findIndex((t) => t.id === newComment.threadId)
           if (tIdx >= 0) {
             threads[tIdx].replyCount += 1

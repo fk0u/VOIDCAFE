@@ -5,7 +5,7 @@ import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 import { SynthWidget } from '@/components/ui/synth-widget'
 import { getStorageItem } from '@/lib/storage'
 import { formatTimeAgo, COMMUNITY_COLORS } from '@/lib/utils'
-import type { Thread, User } from '@/data/types'
+import type { Thread } from '@/data/types'
 
 const ONLINE_USERS = [
   { id: '1', name: 'KWANGYA Warrior', color: '#a855f7' },

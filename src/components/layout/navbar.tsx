@@ -7,8 +7,6 @@ import {
   Plus,
   Home,
   Users,
-  TrendingUp,
-  MessageSquare,
   User,
   Menu,
   X,

@@ -6,16 +6,28 @@ interface FloatingParticlesProps {
   className?: string
 }
 
+function pseudoRandom(seed: number) {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
 export function FloatingParticles({ count = 20, className }: FloatingParticlesProps) {
   const particles = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      delay: Math.random() * 15,
-      duration: 12 + Math.random() * 18,
-      opacity: 0.1 + Math.random() * 0.2,
-    }))
+    return Array.from({ length: count }, (_, i) => {
+      const r1 = pseudoRandom(i * 12.345 + 1.23)
+      const r2 = pseudoRandom(i * 23.456 + 2.34)
+      const r3 = pseudoRandom(i * 34.567 + 3.45)
+      const r4 = pseudoRandom(i * 45.678 + 4.56)
+      const r5 = pseudoRandom(i * 56.789 + 5.67)
+      return {
+        id: i,
+        left: r1 * 100,
+        size: r2 * 3 + 1,
+        delay: r3 * 15,
+        duration: 12 + r4 * 18,
+        opacity: 0.1 + r5 * 0.2,
+      }
+    })
   }, [count])
 
   return (

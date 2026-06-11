@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useInView, motion, AnimatePresence } from 'framer-motion'
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ThreadCard } from './thread-card'
@@ -24,10 +24,10 @@ export function ThreadList({ community: initialCommunity, showFilters = true }: 
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(loadMoreRef, { margin: '200px' })
 
-  const filters = {
+  const filters = useMemo(() => ({
     community: selectedCommunity || undefined,
     sort,
-  }
+  }), [selectedCommunity, sort])
 
   // 1. Infinite Query (used when feedMode === 'infinite')
   const {
@@ -51,10 +51,7 @@ export function ThreadList({ community: initialCommunity, showFilters = true }: 
     }
   }, [isInView, hasNextPage, isFetchingNextPage, fetchNextPage, feedMode])
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [selectedCommunity, sort])
+
 
   // Prefetch adjacent pages for paginated feed
   useEffect(() => {
@@ -75,7 +72,7 @@ export function ThreadList({ community: initialCommunity, showFilters = true }: 
         queryFn: () => fetchPaginatedThreads(filters, page - 1, 6),
       })
     }
-  }, [page, paginatedData, selectedCommunity, sort, feedMode])
+  }, [page, paginatedData, feedMode, filters])
 
   // Determine current threads and loading state based on mode
   const threads = feedMode === 'infinite'
@@ -97,7 +94,10 @@ export function ThreadList({ community: initialCommunity, showFilters = true }: 
         <div className="space-y-3">
           <CategoryChips
             selected={selectedCommunity}
-            onSelect={setSelectedCommunity}
+            onSelect={(c) => {
+              setSelectedCommunity(c)
+              setPage(1)
+            }}
           />
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             {/* Sort options */}
@@ -105,7 +105,10 @@ export function ThreadList({ community: initialCommunity, showFilters = true }: 
               {SORT_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => setSort(opt.value)}
+                  onClick={() => {
+                    setSort(opt.value)
+                    setPage(1)
+                  }}
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer',
                     sort === opt.value

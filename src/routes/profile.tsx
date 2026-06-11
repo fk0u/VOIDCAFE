@@ -1,22 +1,20 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import {
-  User,
   Edit3,
   Heart,
   MessageSquare,
   Calendar,
   Upload,
   Save,
-  Loader2,
   X,
   Hash,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/components/ui/toast'
 import { Spotlight } from '@/components/ui/spotlight'
-import { GlitchText } from '@/components/ui/glitch-text'
 import { getStorageItem } from '@/lib/storage'
 import { cn, formatNumber } from '@/lib/utils'
 import type { Thread } from '@/data/types'

@@ -6,7 +6,7 @@ interface PageTransitionProps {
   children: React.ReactNode
 }
 
-export function PageTransition({ children }: { children: React.ReactNode }) {
+export function PageTransition({ children }: PageTransitionProps) {
   useEffect(() => {
     // Play a tiny, very subtle glitch chirp when entering a new page for that cyber vibe!
     playGlitch()

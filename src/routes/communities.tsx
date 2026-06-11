@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+/* eslint-disable react-refresh/only-export-components */
+import { createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Users, MessageSquare, TrendingUp } from 'lucide-react'
 import { Card3D } from '@/components/ui/card-3d'

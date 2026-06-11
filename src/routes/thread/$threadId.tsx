@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Heart, MessageSquare, Eye, Share2, Bookmark, Clock, Send, Loader2 } from 'lucide-react'

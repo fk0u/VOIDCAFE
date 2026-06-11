@@ -78,7 +78,7 @@ export function VoidTerminal() {
         )
         break
 
-      case 'lore':
+      case 'lore': {
         const loreFragments = [
           `[EXTRACTED DATA: SYNC_TRANSCRIPT_#109]
 "...The flat is collapsing. The ae-avatars report a growing corruption inside the VOIDCAFE database. Some fans believe that by entering the correct frequency (55Hz), the doorway to Kosmo will unlock. Beware of the Black Mamba in the code..."`,
@@ -91,6 +91,7 @@ Is it a fan forum, or is it a laboratory? The metal-tech aesthetic was designed 
         const loreText = loreFragments[Math.floor(Math.random() * loreFragments.length)]
         newLogs.push({ text: loreText, type: 'output' })
         break
+      }
 
       case 'hack':
         playGlitch()
@@ -123,7 +124,7 @@ Is it a fan forum, or is it a laboratory? The metal-tech aesthetic was designed 
         newLogs.push({ text: 'EMITTING FREQUENCY SWEEP SCAN (1200Hz - 220Hz)...', type: 'system' })
         break
 
-      case 'unlock':
+      case 'unlock': {
         const key = args[0]?.toLowerCase()
         if (!key) {
           newLogs.push({ text: 'ERROR: Specify a key. Usage: unlock <key>', type: 'error' })
@@ -145,6 +146,7 @@ Is it a fan forum, or is it a laboratory? The metal-tech aesthetic was designed 
           newLogs.push({ text: `ERROR: UNABLE TO DECRYPT HASHLINK WITH KEY "${key}"`, type: 'error' })
         }
         break
+      }
 
       case 'clear':
         setLogs([])

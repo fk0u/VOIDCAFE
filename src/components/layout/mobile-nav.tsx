@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Home, Users, Plus, TrendingUp, User } from 'lucide-react'
+import { Home, Users, Plus, User } from 'lucide-react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { motion } from 'framer-motion'
 

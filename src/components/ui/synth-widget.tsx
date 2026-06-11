@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Volume2, VolumeX, Activity, Settings, Radio } from 'lucide-react'
+import { Volume2, VolumeX, Activity, Radio } from 'lucide-react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { startSynth, stopSynth, setVolume, setGlitchRate, getAnalyser } from '@/lib/synth'
 
@@ -16,7 +16,7 @@ export function SynthWidget() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number | null>(null)
-  const [readout, setReadout] = useState('STANDBY')
+  const [readout, setReadout] = useState(synthEnabled ? 'MODULATING FREQ: 55.00 Hz' : 'SYS_STANDBY [OFFLINE]')
 
   // Toggle state
   const handleToggle = () => {
@@ -26,8 +26,10 @@ export function SynthWidget() {
       startSynth()
       setVolume(synthVolume)
       setGlitchRate(synthGlitchRate)
+      setReadout('MODULATING FREQ: 55.00 Hz')
     } else {
       stopSynth()
+      setReadout('SYS_STANDBY [OFFLINE]')
     }
   }
 
@@ -47,7 +49,6 @@ export function SynthWidget() {
   // Diagnostic readouts generator
   useEffect(() => {
     if (!synthEnabled) {
-      setReadout('SYS_STANDBY [OFFLINE]')
       return
     }
 

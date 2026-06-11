@@ -15,11 +15,11 @@ export function Preloader() {
   useEffect(() => {
     if (stage !== 'loading') return
 
-    let timer: any = null
+    let timer: ReturnType<typeof setInterval> | null = null
     const runLoading = () => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(timer)
+          if (timer) clearInterval(timer)
           setStage('done')
           setTimeout(() => {
             setPreloaded(true)
@@ -62,7 +62,9 @@ export function Preloader() {
     }
 
     timer = setInterval(runLoading, 150 + Math.random() * 150)
-    return () => clearInterval(timer)
+    return () => {
+      if (timer) clearInterval(timer)
+    }
   }, [stage, setPreloaded, synthEnabled])
 
   const handleUnlock = () => {

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Flame, Zap } from 'lucide-react'
@@ -10,7 +11,7 @@ import { ThreadList } from '@/components/thread/thread-list'
 import { Sidebar } from '@/components/layout/sidebar'
 import { useTrendingThreads } from '@/hooks/useThreads'
 import { usePreferencesStore } from '@/stores/preferencesStore'
-import { cn, getGradientForCommunity, formatNumber, COMMUNITY_COLORS } from '@/lib/utils'
+import { cn, getGradientForCommunity, formatNumber } from '@/lib/utils'
 import { PageTransition } from '@/components/common/page-transition'
 
 export const Route = createFileRoute('/')({

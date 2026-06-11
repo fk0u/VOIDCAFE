@@ -14,13 +14,13 @@ let lfoNode: OscillatorNode | null = null
 let lfoGainNode: GainNode | null = null
 
 // Sequencer
-let sequenceIntervalId: any = null
+let sequenceIntervalId: ReturnType<typeof setInterval> | null = null
 const SCALE = [110.00, 123.47, 130.81, 146.83, 155.56, 174.61, 196.00, 220.00] // A minor / spooky locrian notes
 
 export function initAudio() {
   if (audioCtx) return
 
-  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!AudioContextClass) return
 
   audioCtx = new AudioContextClass()
@@ -323,7 +323,7 @@ export function playClick() {
 
       noise.start()
       noise.stop(now + 0.008)
-    } catch (e) {
+    } catch {
       // Buffer creation fallback
     }
   }

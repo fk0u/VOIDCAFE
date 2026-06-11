@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Image, Upload, Send, Loader2 } from 'lucide-react'
+import { X, Upload, Send, Loader2 } from 'lucide-react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useCreateThread } from '@/hooks/useThreads'
