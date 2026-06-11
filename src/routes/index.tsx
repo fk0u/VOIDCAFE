@@ -27,6 +27,8 @@ function HomePage() {
       <div>
         {/* ═══ Hero Section ═══ */}
       <section className="relative overflow-hidden border-b border-void-border">
+        {/* Cyber grid overlay */}
+        <div className="absolute inset-0 cyber-grid opacity-35 pointer-events-none z-0" />
         <BackgroundBeams />
         <Spotlight className="relative z-10 max-w-7xl mx-auto px-4 py-20 md:py-28">
           <div className="text-center space-y-6">

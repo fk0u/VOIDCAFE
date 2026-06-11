@@ -88,7 +88,8 @@ export function SynthWidget() {
     const height = rect.height
 
     const bufferLength = 256
-    const dataArray = new Uint8Array(bufferLength)
+    const timeData = new Uint8Array(bufferLength)
+    const freqData = new Uint8Array(bufferLength)
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw)
@@ -100,12 +101,32 @@ export function SynthWidget() {
       const analyser = getAnalyser()
 
       if (synthEnabled && analyser) {
-        // Real time oscilloscope wave
-        analyser.getByteTimeDomainData(dataArray)
+        // Real time oscilloscope wave & frequency bars
+        analyser.getByteTimeDomainData(timeData)
+        analyser.getByteFrequencyData(freqData)
 
-        ctx.lineWidth = 1.5
-        // Glow effect
-        ctx.shadowBlur = 6
+        // 1. Draw Frequency Area Graph in neon cyan (background layer)
+        ctx.shadowBlur = 0
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.08)' // Muted transparent neon cyan
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.25)' // Muted neon cyan border
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(0, height)
+        const barWidth = width / bufferLength
+        let freqX = 0
+        for (let i = 0; i < bufferLength; i++) {
+          const val = freqData[i] / 255.0
+          const barHeight = val * height * 0.85
+          ctx.lineTo(freqX, height - barHeight)
+          freqX += barWidth
+        }
+        ctx.lineTo(width, height)
+        ctx.fill()
+        ctx.stroke()
+
+        // 2. Draw Time Domain Waveform on top in glowing neon purple
+        ctx.lineWidth = 2
+        ctx.shadowBlur = 8
         ctx.shadowColor = '#a855f7'
         ctx.strokeStyle = '#c084fc' // Light neon purple
         ctx.beginPath()
@@ -114,7 +135,7 @@ export function SynthWidget() {
         let x = 0
 
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0
+          const v = timeData[i] / 128.0
           const y = (v * height) / 2
 
           if (i === 0) {

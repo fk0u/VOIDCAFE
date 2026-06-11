@@ -53,7 +53,11 @@ export function ThreadCard({ thread, index = 0 }: ThreadCardProps) {
             params={{ threadId: thread.id }}
             onMouseEnter={playHover}
             onClick={playClick}
-            className="block rounded-xl bg-void-card border border-void-border hover:border-void-border-light transition-all duration-300 overflow-hidden group"
+            style={{
+              '--community-color': COMMUNITY_COLORS[thread.community] || '#a855f7',
+              '--community-glow': `${COMMUNITY_COLORS[thread.community] || '#a855f7'}20`,
+            } as React.CSSProperties}
+            className="block rounded-xl bg-void-card border border-void-border hover:border-[var(--community-color)] hover:shadow-[0_0_20px_var(--community-glow)] transition-all duration-300 overflow-hidden group"
           >
             {/* Cover Image / Gradient */}
             <div

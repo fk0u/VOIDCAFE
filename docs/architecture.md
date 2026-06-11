@@ -1,66 +1,94 @@
 # 🏗️ Application Architecture
 
-VOIDCAFE is architected as a highly optimized, fully client-side single-page application (SPA). It simulates full server capabilities (database, mutations, cache invalidations, and prefetching) using local storage and TanStack state engines.
+VOIDCAFE is designed as a highly responsive client-side Single Page Application (SPA). By leveraging browser storage APIs and state query managers, it simulates a full server experience (complete with database synchronization, cache invalidations, and prefetching queries) with zero backend setup.
 
 ---
 
-## 🎛️ Global State: Zustand
+## 🎛️ Global State Store: Zustand
 
-Global layout variables, preferences, and authentication states are governed by **Zustand**. 
+Global visual configurations, audio volumes, and user session variables are managed by **Zustand**. 
 
-### Persistence Strategy
-Zustand's state stores are split into persisted and in-memory states to maintain system integrity:
+### Selective State Persistence (Partialization)
+To keep the application boot logic clean, we split states into long-term stored values and volatile session variables:
 
 1. **`authStore.ts`**:
-   - Stores current logged-in user profile data and session parameters.
-   - Fully persisted to `localStorage` under key `voidcafe_auth`.
+   - Stores current logged-in user profile, display names, and biases.
+   - Fully persisted in local storage under key `voidcafe_auth` so sessions survive browser restarts.
 2. **`preferencesStore.ts`**:
-   - Stores visual controls like `feedMode` (Infinite Scroll vs Paginated), `synthVolume`, and LFO `synthGlitchRate`.
-   - **Selective Persistence (Partialization)**: Layout overlay toggles (such as `terminalOpen`, `createModalOpen`, and `preloaded` flags) are **excluded** from persistence. This ensures that refreshing the browser fresh-boots the preloader and closes modal overlays while retaining user volume/feed preferences.
-
----
-
-## 🧭 File-Based Routing: TanStack Router
-
-VOIDCAFE utilizes **TanStack Router** (v1) for state-safe, TypeScript-first routing.
-
-- **Generated Route Tree**: Vite plugin compiles files in `/src/routes` into a compiled route tree at `routeTree.gen.ts`.
-- **Automatic Code Splitting**: Subpages (like `/profile` or `/thread/$threadId`) are dynamically split into separate JS chunks, minimizing the initial HTML bundle size.
-- **Visual Nesting**: A parent `__root.tsx` wraps the entire application layout, providing shared layout nodes (navbars, background particles, search overlays, and preloader animations) while subpages render inside `<Outlet />`.
-
----
-
-## 🔄 Data Fetching & Caching: TanStack Query (v5)
-
-All data interactions simulate network calls with asynchronous promises and randomized timeouts (e.g. 200ms - 400ms network simulation delays).
-
-### Caching and Stale Time
-- **`staleTime`**: Set to 5 minutes. Queries remain fresh in cache, preventing redundant simulations during quick navigation.
-- **`gcTime`**: Set to 30 minutes. Inactive queries are garbage collected.
-
-### Pagination & Prefetching ("Best Caching" Practices)
-For the Paginated Archive feed, two key performance enhancements are implemented:
-
-1. **Placeholder Keeping**:
-   - The query hook is configured with `placeholderData: (previousData) => previousData`.
-   - When moving from Page 1 to Page 2, TanStack Query continues rendering Page 1's posts instead of flashing a loading skeleton, completing a smooth transition when Page 2 is loaded.
-2. **Prefetching adjacent pages**:
-   - Inside the feed component, a mounting hook triggers background cache fetches:
+   - Stores user preferences (`feedMode` type, `synthVolume` level, and LFO `synthGlitchRate` percentage).
+   - **Selective Persistence**: Screen overlays (`terminalOpen` state, `createModalOpen` thread-modal state, and `preloaded` lock-screen flag) are **excluded** from persistence using Zustand's `partialize` parameter:
      ```typescript
-     // Prefetch next page
-     if (page < totalPages) {
-       queryClient.prefetchQuery({
-         queryKey: ['threads', 'paginated', filters, page + 1, limit],
-         queryFn: () => fetchPaginatedThreads(filters, page + 1, limit),
-       })
-     }
+     partialize: (state) => ({
+       feedMode: state.feedMode,
+       synthVolume: state.synthVolume,
+       synthGlitchRate: state.synthGlitchRate,
+     })
      ```
-   - Clicking "Next Page" loads the next page instantly with **0ms latency** because the data is already inside the React Query cache.
+     This ensures that refreshing the browser always launches the preloader lock-screen and closes all modal overlays, while retaining the user's volume settings.
 
-### Optimistic Updates with Rollback
-Mutations (such as Liking a Thread or Liking a Comment) reflect changes immediately on the UI before the virtual server confirms the request:
-1. **Cancel Queries**: Outstanding queries are cancelled to prevent overwrites.
-2. **Snapshot Cache**: Stores the previous state in a context snapshot.
-3. **Optimistically Mutate**: Sets cache values instantly (e.g., increments like count, adds user to `likedBy` array).
-4. **Error Rollback**: If the mutation promise rejects, the `onError` hook restores the snapped previous state, maintaining synchronization.
-5. **Settled Invalidation**: Triggers cache invalidation (`invalidateQueries`) upon completion to fetch the final virtual state.
+---
+
+## 🧭 Routing Engine: TanStack Router
+
+VOIDCAFE utilizes **TanStack Router** (v1) for strict TypeScript-first, file-based routing.
+
+- **File-based Generation**: Routes defined inside [src/routes/](file:///d:/Project/VOIDCAFE/src/routes/) are parsed by the TanStack plugin to generate [routeTree.gen.ts](file:///d:/Project/VOIDCAFE/src/routeTree.gen.ts).
+- **Code Splitting**: Nested route paths (like `/profile` or `/thread/$threadId`) are compiled into code-split chunks. The browser only fetches the script code required for the current viewport.
+- **Unified Wrappers**: The root layout `__root.tsx` renders shared elements (navbars, mobile navigation menus, floating particle canvas, and search overlays) alongside a central `<Outlet />` node, enabling smooth page-blur transitions.
+
+---
+
+## 🔄 Data Caching: TanStack Query (v5)
+
+Data loading and writing functions run through **TanStack Query (React Query)** to keep caches clean.
+
+### 1. Cache Lifespans
+- `staleTime`: Set to 5 minutes (`300000ms`). Queries stay fresh in memory, preventing network simulation delays when switching pages.
+- `gcTime`: Set to 30 minutes. Inactive query data is garbage collected.
+
+### 2. Prefetching & Placeholder Keeping
+To make page navigation instant, we implement two key patterns:
+- **Placeholder Data**: Paginated query hooks use `placeholderData: (previousData) => previousData`. When clicking page links, React keeps displaying the current page elements instead of rendering a blank loading screen while fetching the next dataset.
+- **Adjacent Prefetching**: When the feed component mounts, it prefetches the page before and after the current viewport in the background:
+  ```typescript
+  if (page < totalPages) {
+    queryClient.prefetchQuery({
+      queryKey: ['threads', 'paginated', filters, page + 1, limit],
+      queryFn: () => fetchPaginatedThreads(filters, page + 1, limit),
+    })
+  }
+  ```
+  This reduces load times to **0ms** when users browse pages sequentially.
+
+---
+
+## ⚡ Optimistic Updates with Rollback Flow
+
+For user likes (Threads/Comments), we update the cache instantly before waiting for the database simulation promise to resolve. If the simulated network request fails, we roll back to the snapped state.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Interaction
+    participant Hook as Query Hook
+    participant Cache as React Query Cache
+    participant DB as LocalStorage DB
+
+    User->>Hook: Clicks "Like"
+    activate Hook
+    Hook->>Cache: Cancel ongoing queries (queryClient.cancelQueries)
+    Hook->>Cache: Take snapshot of current state (queryClient.getQueryData)
+    Hook->>Cache: Update UI instantly (queryClient.setQueryData)
+    Note over Cache: UI reflects like count incremented (0ms)
+    Hook->>DB: Send mutation promise (setTimeout mock request)
+    alt Simulation Success
+        DB-->>Hook: Resolve success promise
+        Hook->>Cache: Invalidate cache (queryClient.invalidateQueries)
+    else Simulation Failure / Exception
+        DB-->>Hook: Reject promise (Error)
+        Hook->>Cache: Restore state from snapshot (onError rollback context)
+        Note over Cache: UI reverts back to previous like state
+    end
+    deactivate Hook
+```
+This flow is fully implemented inside [useThreads.ts](file:///d:/Project/VOIDCAFE/src/hooks/useThreads.ts) (`useLikeThread` hook) and [useComments.ts](file:///d:/Project/VOIDCAFE/src/hooks/useComments.ts) (`useLikeComment` hook).

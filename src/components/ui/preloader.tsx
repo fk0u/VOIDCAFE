@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShieldAlert, Lock, Unlock, Loader2 } from 'lucide-react'
 import { usePreferencesStore } from '@/stores/preferencesStore'
@@ -10,6 +10,64 @@ export function Preloader() {
   const [stage, setStage] = useState<'lock' | 'loading' | 'done'>('lock')
   const [progress, setProgress] = useState(0)
   const [currentText, setCurrentText] = useState('SYSTEM ENCRYPTED')
+
+  const matrixCanvasRef = useRef<HTMLCanvasElement>(null)
+
+  // Matrix Digital Rain backdrop
+  useEffect(() => {
+    if (stage === 'done') return
+    const canvas = matrixCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', handleResize)
+
+    const matrixChars = 'KWANGYAæSYNKnaevisKOSMOFLATBLACKMAMBAVOIDCAFE0101'
+    const charArr = matrixChars.split('')
+    const fontSize = 14
+    const columns = canvas.width / fontSize
+    const drops: number[] = Array(Math.floor(columns)).fill(1)
+
+    let animeId: number
+    const draw = () => {
+      ctx.fillStyle = 'rgba(5, 5, 5, 0.08)' // Trails fade
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      ctx.font = `bold ${fontSize}px var(--font-accent), monospace`
+
+      for (let i = 0; i < drops.length; i++) {
+        // Occasionally switch color to neon cyan for glitch vibe
+        if (Math.random() > 0.96) {
+          ctx.fillStyle = '#22d3ee'
+        } else {
+          ctx.fillStyle = '#a855f7'
+        }
+
+        const text = charArr[Math.floor(Math.random() * charArr.length)]
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize)
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0
+        }
+        drops[i]++
+      }
+      animeId = requestAnimationFrame(draw)
+    }
+
+    draw()
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      cancelAnimationFrame(animeId)
+    }
+  }, [stage])
 
   // Loading progress simulation
   useEffect(() => {
@@ -87,6 +145,9 @@ export function Preloader() {
           transition={{ duration: 0.8, ease: 'easeInOut' }}
           className="fixed inset-0 z-[999] bg-void-deeper flex flex-col items-center justify-center p-6 select-none"
         >
+          {/* Cyber code rain backdrop */}
+          <canvas ref={matrixCanvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-20" />
+
           {/* Grid Background */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#111111_1px,transparent_1px),linear-gradient(to_bottom,#111111_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
           
