@@ -13,7 +13,7 @@ export function MobileNav() {
   const { setCreateModalOpen } = usePreferencesStore()
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 glass-heavy border-t border-void-border md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 glass-heavy border-t border-void-border md:hidden pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around px-2 py-2">
         {MOBILE_LINKS.slice(0, 2).map(({ to, label, icon: Icon }) => (
           <Link

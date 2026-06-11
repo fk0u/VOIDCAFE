@@ -13,6 +13,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ThreadThreadIdRouteImport } from './routes/thread/$threadId'
+import { Route as CommunityCommunityIdRouteImport } from './routes/community/$communityId'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -34,17 +35,24 @@ const ThreadThreadIdRoute = ThreadThreadIdRouteImport.update({
   path: '/thread/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityCommunityIdRoute = CommunityCommunityIdRouteImport.update({
+  id: '/community/$communityId',
+  path: '/community/$communityId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
+  '/community/$communityId': typeof CommunityCommunityIdRoute
   '/thread/$threadId': typeof ThreadThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
+  '/community/$communityId': typeof CommunityCommunityIdRoute
   '/thread/$threadId': typeof ThreadThreadIdRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
+  '/community/$communityId': typeof CommunityCommunityIdRoute
   '/thread/$threadId': typeof ThreadThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/communities' | '/profile' | '/thread/$threadId'
+  fullPaths:
+    | '/'
+    | '/communities'
+    | '/profile'
+    | '/community/$communityId'
+    | '/thread/$threadId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/communities' | '/profile' | '/thread/$threadId'
-  id: '__root__' | '/' | '/communities' | '/profile' | '/thread/$threadId'
+  to:
+    | '/'
+    | '/communities'
+    | '/profile'
+    | '/community/$communityId'
+    | '/thread/$threadId'
+  id:
+    | '__root__'
+    | '/'
+    | '/communities'
+    | '/profile'
+    | '/community/$communityId'
+    | '/thread/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunitiesRoute: typeof CommunitiesRoute
   ProfileRoute: typeof ProfileRoute
+  CommunityCommunityIdRoute: typeof CommunityCommunityIdRoute
   ThreadThreadIdRoute: typeof ThreadThreadIdRoute
 }
 
@@ -99,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThreadThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/$communityId': {
+      id: '/community/$communityId'
+      path: '/community/$communityId'
+      fullPath: '/community/$communityId'
+      preLoaderRoute: typeof CommunityCommunityIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -106,6 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunitiesRoute: CommunitiesRoute,
   ProfileRoute: ProfileRoute,
+  CommunityCommunityIdRoute: CommunityCommunityIdRoute,
   ThreadThreadIdRoute: ThreadThreadIdRoute,
 }
 export const routeTree = rootRouteImport

@@ -7,9 +7,8 @@ import { Spotlight } from '@/components/ui/spotlight'
 import { getStorageItem } from '@/lib/storage'
 import { cn, formatNumber } from '@/lib/utils'
 import type { Community } from '@/data/types'
-import { useState } from 'react'
-import { ThreadList } from '@/components/thread/thread-list'
 import { PageTransition } from '@/components/common/page-transition'
+import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/communities')({
   component: CommunitiesPage,
@@ -17,7 +16,6 @@ export const Route = createFileRoute('/communities')({
 
 function CommunitiesPage() {
   const communities = getStorageItem<Community[]>('communities', [])
-  const [selected, setSelected] = useState<string | null>(null)
 
   return (
     <PageTransition>
@@ -47,13 +45,11 @@ function CommunitiesPage() {
           >
             <Card3D>
               <Spotlight fill="rgba(168, 85, 247, 0.1)">
-                <button
-                  onClick={() => setSelected(selected === community.name ? null : community.name)}
+                <Link
+                  to="/community/$communityId"
+                  params={{ communityId: community.id }}
                   className={cn(
-                    'w-full rounded-xl border transition-all duration-300 overflow-hidden text-left',
-                    selected === community.name
-                      ? 'border-neon-purple/50 bg-neon-purple/5'
-                      : 'border-void-border bg-void-card hover:border-void-border-light'
+                    'block w-full rounded-xl border transition-all duration-300 overflow-hidden text-left border-void-border bg-void-card hover:border-void-border-light'
                   )}
                 >
                   {/* Image/Gradient Header */}
@@ -98,34 +94,12 @@ function CommunitiesPage() {
                       </span>
                     </div>
                   </div>
-                </button>
+                </Link>
               </Spotlight>
             </Card3D>
           </motion.div>
         ))}
       </div>
-
-      {/* Filtered Thread List */}
-      {selected && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2 className="font-heading text-xl font-bold text-metal-200 flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-neon-cyan" />
-            {selected} Threads
-          </h2>
-          <ThreadList community={selected} showFilters={false} />
-        </motion.div>
-      )}
-
-      {!selected && (
-        <div className="text-center py-8">
-          <p className="text-metal-600 text-sm">
-            Select a community to view threads
-          </p>
-        </div>
-      )}
       </div>
     </PageTransition>
   )

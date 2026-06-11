@@ -74,6 +74,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+img, a, button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+img {
+  -webkit-user-drag: none;
+}
+
 ::selection {
   background-color: #a855f740;
   color: #e8e8e8;
@@ -322,7 +331,7 @@ body {
 /* ── Mobile Bottom Nav Spacer ─────────────────────────────────── */
 
 @media (max-width: 768px) {
-  body { padding-bottom: 72px; }
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 }
 
 /* ── Cyber Grid Backdrop ── */

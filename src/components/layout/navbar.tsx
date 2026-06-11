@@ -100,9 +100,9 @@ export function Navbar() {
             playClick()
             setSearchModalOpen(true)
           }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-void-surface border border-void-border text-metal-500 hover:text-metal-300 hover:border-void-border-light transition-all text-sm"
+          className="flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-transparent sm:bg-void-surface border border-transparent sm:border-void-border text-metal-400 hover:text-metal-200 hover:bg-void-elevated sm:hover:bg-void-surface transition-all text-sm"
         >
-          <Search className="w-4 h-4" />
+          <Search className="w-5 h-5 sm:w-4 sm:h-4" />
           <span className="hidden sm:inline">Search...</span>
           <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-void-elevated text-[10px] font-mono text-metal-600 border border-void-border">
             /
@@ -118,7 +118,7 @@ export function Navbar() {
             playClick()
             setCreateModalOpen(true)
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-neon-purple to-neon-purple-dark text-white text-sm font-semibold hover:shadow-lg hover:shadow-neon-purple-glow transition-shadow"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-neon-purple to-neon-purple-dark text-white text-sm font-semibold hover:shadow-lg hover:shadow-neon-purple-glow transition-shadow"
         >
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">New</span>
@@ -131,7 +131,7 @@ export function Navbar() {
             playClick()
             setTerminalOpen(true)
           }}
-          className="p-2 rounded-lg text-metal-400 hover:text-neon-cyan hover:bg-neon-cyan/5 border border-transparent hover:border-neon-cyan/20 transition-all cursor-pointer hidden sm:block"
+          className="p-2 rounded-lg text-metal-400 hover:text-neon-cyan hover:bg-neon-cyan/5 border border-transparent hover:border-neon-cyan/20 transition-all cursor-pointer hidden md:block"
           title="Open terminal console (Press ~)"
         >
           <Terminal className="w-5 h-5" />
@@ -251,7 +251,7 @@ export function Navbar() {
         {/* User Avatar */}
         <Link
           to="/profile"
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center text-xs font-bold text-white border-2 border-void-border hover:border-neon-purple/50 transition-colors"
+          className="hidden md:flex w-8 h-8 rounded-full bg-gradient-to-br from-neon-purple to-neon-cyan items-center justify-center text-xs font-bold text-white border-2 border-void-border hover:border-neon-purple/50 transition-colors shrink-0"
         >
           {currentUser?.avatar ? (
             <img
